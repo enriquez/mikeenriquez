@@ -1,0 +1,137 @@
+---
+layout: post
+title: jQuery plugin EZPZ Tooltip
+---
+p(update). *UPDATE April 12, 2009*. Added the showContent and hideContent callbacks. Use these for custom effects. Also updated the demo for examples.
+
+There are a "ton of tooltip plugins":http://www.google.com/search?q=jquery+tooltip for jQuery out there, but I couldn't find one that works with the way I think. To me, it's a simple concept: You hover over a target element, then some content shows up. It should be flexible enough to customize the look and feel without requiring the bloat of any CSS or images. Hover targets should be mapped to their content counterparts by convention. I think I've built _just that_ with the EZPZ Tooltip.
+
+Check out "the demo here":/demos/ezpz-tooltip.
+
+h3. Features
+
+* *Clean and semantic HTML*. This tooltip does not rely on putting a bunch of crap in the title attribute. The content is defined in its own HTML element.
+* *Convention over configuration*. The content element is inferred from the name of the target element.
+* *Flexible appearance*. Since the elements are just plain old HTML, they are styled by using CSS. If you want stems or rounded corners, just give the content element a background image.
+* *Flexible content positioning*. The position of the content can be customized by specifying one of the built in positions, but if you're feeling ambitious you can write your own positioning algorithm if you need something more customized.
+* *Simple and lightweight*. This tooltip doesn't try to do everything for you, but if you want it to do something you can make it happen.
+* *Custom effects*. fadeIn and fadeOut (or any other effect) can be achieved by defining the showContent and hideContent callbacks.
+
+h3. Basic Usage
+
+h4. The HTML
+
+We need two elements, one for the target and one for the content. Take note of the id attribute.
+
+{% highlight html %}
+<span id="example-target-1">Hover over me</span>
+<div id="example-content-1">Tooltip content</div>
+{% endhighlight %}
+
+The content can be any block level element. We can easily use an image for the content by doing something like this:
+
+{% highlight html %}
+<img id="example-content-1" width="276" height="110" src="http://google.com/intl/en_ALL/images/logo.gif" alt="Google"/>
+{% endhighlight %}
+
+h4. The Javascript
+
+Bind the hover event by calling @ezpz_tooltip()@ on the target element on the document ready event. I'll explain the naming convention for the target and content elements later.
+
+{% highlight javascript %}
+$(document).ready(function(){
+  $("#example-target-1").ezpz_tooltip();
+});
+{% endhighlight %}
+
+h4. The CSS
+
+We need to hide the content of the tooltip and give it an absolute position (this may be done automatically in future versions of this plugin). This is where you can customize the look of the content by giving it a background image, borders, colors, etc...
+
+{% highlight css %}
+#example-content-1 {
+  display: none; /* required */
+  position: absolute; /* required */
+  padding: 10px; border: 1px solid black;
+  background-color: white;
+}
+{% endhighlight %}
+
+h4. The Convention
+
+By convention, the target and content elements are bound together by the name of their id attribute. The convention is this: <notextile>(name)-target-(unique id)</notextile> will be bound to <notextile>(name)-content-(unique id)</notextile>. You can *override this behavior* by passing the id of the content to @ezpz_tooltip()@ like so:
+
+{% highlight javascript %}
+$("#target").ezpz_tooltip({contentId:"content"});
+{% endhighlight %}
+
+{% highlight html %}
+<div id="target">Hover over me</div>
+<div id="content">I'm target's hover content</div>
+{% endhighlight %}
+
+h3. Advanced Usage
+
+h4. Bind multiple tooltips
+
+Typically, your page will have multiple tooltips on it.
+
+{% highlight html %}
+<div class="tooltip-target" id="example-target-1">First Target</div>
+<div class="tooltip-target" id="example-target-2">Second Target</div>
+<div class="tooltip-target" id="example-target-3">Third Target</div>
+
+<div class="tooltip-content" id="example-content-1">Content for first</div>
+<div class="tooltip-content" id="example-content-2">Content for second</div>
+<div class="tooltip-content" id="example-content-3">Content for third</div>
+{% endhighlight %}
+
+To bind all of the targets to their corresponding content, it takes only one line:
+
+{% highlight javascript %}
+$(".tooltip-target").ezpz_tooltip();
+{% endhighlight %}
+
+Calling @ezpz_tooltip()@ on a class will bind the hover event to each element, and because of the naming convention it will know which content to display.
+
+h4. Custom content position
+
+Defining and using a position function is done like this:
+
+{% highlight javascript %}
+$.fn.ezpz_tooltip.positions.topLeft = function(contentInfo, mouseX, mouseY, offset, targetInfo) {
+  contentInfo['top'] = 0;
+  contentInfo['left'] = 0;
+  return contentInfo;
+};
+
+$("#tooltip-target-1").ezpz_tooltip({
+  contentPosition: 'topLeft'
+});
+{% endhighlight %}
+
+This @topLeft@ example will position the content to the upper left corner of the window. You'll probably need to use the parameters for your custom position, so here's some detail on them:
+
+* *contentInfo*: This contains the @top@, @left@, @width@, and @height@ information for the content element.
+* *mouseX*: The X position of the mouse.
+* *mouseY*: The Y position of the mouse.
+* *offset*: The user defined offset.
+* *targetInfo*: This contains the @top@, @left@, @width@, and @height@ information for the target element.
+
+For more examples of position functions, look towards the bottom of the @jquery.ezpz_tooltip.js@ file.
+
+h4. Options and their defaults
+* *contentPosition*: @'aboveRightFollow'@. This takes the name of the position function. Other possible values are @aboveFollow@, @rightFollow@, @belowRightFollow@, @belowFollow@, @aboveStatic@, @rightStatic@, and @belowStatic@.
+* *stayOnContent*: @false@. Set to @true@ if you want the content to stay visible when the user hovers over the content.
+* *offset*: @10@. Number of pixels to offset.
+* *contentInfo*: @""@. Give the id attribute of the content here if it can't be found by convention.
+* *beforeShow*: @function(content){}@. Define this function to do something before the content is shown. Usually, an AJAX call is used here to populate the content.
+* *afterHide*: @function(){}@. Define this function to do something after the content is hidden.
+
+h3. Download
+
+The code is "available on GitHub":http://github.com/enriquez/ezpz-tooltip/tree/master. The _master_ branch contains the code for development. The _minified_ branch contains the compacted version that should be used in production. The latest stable version can be downloaded below:
+
+"jquery.ezpz_tooltip.js":http://cloud.github.com/downloads/enriquez/ezpz-tooltip/jquery.ezpz_tooltip.js
+
+"jquery.ezpz_tooltip.min.js":http://cloud.github.com/downloads/enriquez/ezpz-tooltip/jquery.ezpz_tooltip.min.js

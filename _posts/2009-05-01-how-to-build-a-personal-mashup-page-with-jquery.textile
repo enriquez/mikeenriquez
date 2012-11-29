@@ -1,0 +1,133 @@
+---
+layout: post
+title: How to build a personal mashup page with jQuery
+---
+After finding out about "GitHub pages":http://pages.github.com, I decided to put mine to good use by building a mashup for my online content. Since we don't have any control on the server side, we're going to use only javascript to make it dynamic. This tutorial will show you how to use jQuery and JSONP to pull data from Twitter, GitHub, and an RSS Feed (without any server side magic). The techniques here can easily be used to interact with any other API.
+
+For a demo, visit "my personal mashup page hosted on GitHub":http://enriquez.github.com. Get the code from "GitHub":http://github.com/enriquez/enriquez.github.com
+
+h3. What is JSONP, and why do I need to use it?
+
+JSONP is JSON with padding. For security reasons, browsers do not allow for scripts from a remote domain to run. This is known as the same origin policy. There a couple ways to get around this restriction, but we're going to use JSONP in this tutorial because it is a purely javascript solution. Plus, "jQuery 1.2 and greater makes it easy to work with JSONP":http://docs.jquery.com/Release:jQuery_1.2/Ajax#Cross-Domain_getJSON_.28using_JSONP.29.
+
+h3. jQuery and Twitter
+
+First thing you need to do is get familiar with the "Twitter API Documentation":http://apiwiki.twitter.com/Twitter-API-Documentation. Let's list a user's status updates using the "statuses/user_timeline":http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-user_timeline method.
+
+bq. This method is called with a GET request and does not require any authentication. It might not be a good idea to use a method that requires authentication using javascript. Try to stick with publicly available data or methods.
+
+Twitter supports a couple different data formats. Since we want JSON, the URL to get a user's timeline is @http://twitter.com/statuses/user_timeline/<username>.json@
+
+Let's build a wrapper for the Twitter API, and create a @Statuses.user_timeline@ function. Let's also create a @Users.show@ function for kicks.
+
+{% highlight javascript %}
+// Twitter API wrapper. http://apiwiki.twitter.com/Twitter-API-Documentation
+function TwitterAPI(){}
+
+TwitterAPI.Users = function Users(){}
+TwitterAPI.Statuses = function Statuses(){}
+
+// http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-users%C2%A0show
+TwitterAPI.Users.show = function(username, callback){
+  requestURL = "http://twitter.com/users/show/" + username + ".json?callback=?";
+  $.getJSON(requestURL, callback);
+}
+
+// http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-user_timeline
+TwitterAPI.Statuses.user_timeline = function(username, callback){
+  requestURL = "http://twitter.com/statuses/user_timeline/" + username + ".json?callback=?";
+  $.getJSON(requestURL, callback);
+}
+{% endhighlight %}
+
+This wrapper simply takes a username and callback function, builds the URL, then passes it off to jQuery's @$.getJSON@ function. Notice in the @requestURL@ that we had to add @?callback=?@. Without it we would get a security error because of the same origin policy.
+
+Let's build a list of tweets for the Twitter user "enriquez":http://twitter.com/enriquez using the TwitterAPI wrapper:
+
+{% highlight javascript %}
+TwitterAPI.Statuses.user_timeline("enriquez", function(json, status){
+  var content = "";
+  $.each(json, function(i){
+    tweet = this['text'];
+    content += "<li class=\"tweets\">" + tweet + "</li>";
+  });
+  $("ul#tweets").html(content);
+})
+{% endhighlight %}
+
+You can see that our callback function is given a parameter called @json@. This is from jQuery's @$.getJSON@, and it contains a collection of statuses. The above example loops through each status and places the text in a list. You can see what else is available in this object by studying the response structure from the "Twitter API documentation for user_timeline":http://apiwiki.twitter.com/Twitter-REST-API-Method%3A-statuses-user_timeline. For example, if you want to get the "tweeted date" you would access the @created_at@ attrbute and call it like this: @this['created_at']@.
+
+h3. jQuery and GitHub
+
+The process for retrieving data from GitHub is similar to Twitter. The following is the GitHub API wrapper with a function for getting a user's list of repos.
+
+{% highlight javascript %}
+// http://develop.github.com/p/repo.html
+GitHubAPI.Repos = function(username, callback){
+  requestURL = "http://github.com/api/v2/json/repos/show/" + username + "?callback=?";
+  $.getJSON(requestURL, function(json, status){
+    callback(json.repositories, status);
+  });
+}
+{% endhighlight %}
+
+Notice that I'm passing in @json.repositories@, instead of just @json@. This is just for convenience. Building a list of a user's repositories is accomplished like so:
+
+{% highlight javascript %}
+GitHubAPI.Repos("enriquez", function(json, status){
+  var content = "";
+  $.each(json, function(i){
+    projectName = this['name']
+    content += "<li class=\"project\">" + projectName + "</li>";
+  });
+  $("ul#projects").html(content);
+})
+{% endhighlight %}
+
+h3. jQuery and an RSS Feed
+
+An RSS Feed isn't an API, but it is an XML file. Because it is an XML file, it takes a bit more work to read it in with jQuery. Not only do we need to work around the same origin policy, we need the data in JSON format... not XML. We could write a server side script to turn XML into JSON, but its easier to use
+
+"Yahoo! Pipes":http://pipes.yahoo.com/pipes/ to do this for us. Yahoo! Pipes is great for building mashups. It allows you to work with API's easily and better yet, it can expose an existing API with JSONP.
+
+I've already created a Yahoo! Pipe that you can use to read an RSS Feed. Below is the wrapper for it.
+
+{% highlight javascript %}
+// RSS Feed wrapper
+function RSSFeed(){}
+
+// Yahoo pipe for turning an RSS XML feed into JSONP
+// http://pipes.yahoo.com/pipes/pipe.run?_id=NvfW_c9m3hGRjX4hoRWqPg
+RSSFeed.Entries = function(feed_url, callback){
+  requestURL = "http://pipes.yahoo.com/pipes/pipe.run?_id=NvfW_c9m3hGRjX4hoRWqPg&_render=json&_callback=?&feed=" + feed_url;
+  $.getJSON(requestURL, function(json, status){
+    callback(json.value.items, status);
+  });
+}
+{% endhighlight %}
+
+Just pass this your feed url, and you'll be given an object containing a collection of "entries" or articles. Use the wrapper like this:
+
+{% highlight javascript %}
+RSSFeed.Entries("http://feeds2.feedburner.com/theezpzway", function(json, status){
+  var content = "";
+  $.each(json, function(i){
+    postTitle = "<a href=\"" + this['link'] + "\">" + this['title'] + "</a>";
+    content += "<p class=\"posts\">" + postTitle + "</p>";
+  })
+
+  $("div#posts").html(content);
+})
+{% endhighlight %}
+
+h3. Conclusion
+
+Using jQuery and some API's you can build a dynamic mashup site without the need any server side logic. The code for "my mashup":http://enriquez.github.com is on "GitHub":http://github.com/enriquez/enriquez.github.com. Bonus points to whoever finds the easter egg!
+
+h3. Resources
+
+* "Twitter API Documentation":http://apiwiki.twitter.com/Twitter-API-Documentation
+* "GitHub API Documentation":http://develop.github.com
+* "jQuery docs for $.getJSON":http://docs.jquery.com/Ajax/jQuery.getJSON#urldatacallback
+* "IBM Article: Combine JSONP and jQuery to quickly build powerful mashups":http://www.ibm.com/developerworks/library/wa-aj-jsonp1/?ca=dgr-lnxw9dJSONP-jQuery&S_TACT=105AGX59&S_CMP=grsitelnxw9d
+* "Yahoo! Pipes":http://pipes.yahoo.com/pipes/

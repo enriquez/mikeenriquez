@@ -1,0 +1,3 @@
+_site/**
+.dotcloud/**
+dotcloud.yml

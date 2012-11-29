@@ -1,0 +1,93 @@
+---
+layout: post
+title: Don't forget about respond_to? when implementing method_missing
+---
+@method_missing@ can be used to do some really cool things in Ruby, but it can also cause some headaches when done improperly. One cause for headache is when @method_missing@ comes with a broken or missing @respond_to?@ implementation.
+
+h3. Example Proxy class
+
+Consider the following example of a "proxy class":http://railstips.org/blog/archives/2009/08/07/patterns-are-not-scary-method-missing-proxy/ that uses @method_missing@, but doesn't implement @respond_to?@.
+
+{% highlight ruby %}
+class Proxy
+  def initialize(subject)
+    @subject = subject
+  end
+  
+  def method_missing(method)
+    @subject.send(method)
+  end
+end
+
+proxy = Proxy.new(Time)
+proxy.respond_to?(:now) # => false
+proxy.now # => Fri Feb 05 00:34:53 -0500 2010
+{% endhighlight %}
+
+Our proxy object is a dirty liar. When we ask if it responds to @now@ it returns @false@, but when we actually call @now@ it responds successfully.
+
+Here's a better implementation for Proxy:
+
+{% highlight ruby %}
+class Proxy
+  def initialize(subject)
+    @subject = subject
+  end
+
+  def method_missing(method)
+    if @subject.respond_to?(method)
+      @subject.send(method)
+    else
+      super(method)
+    end
+  end
+
+  def respond_to?(method, include_private = false)
+    super || @subject.respond_to?(method, include_private)
+  end
+end
+
+proxy = Proxy.new(Time)
+proxy.respond_to?(:now) # => true
+proxy.now # => Fri Feb 05 00:34:53 -0500 2010
+{% endhighlight %}
+
+That's better. We added an implementation for @respond_to?@ and some calls to @super@. Keep in mind that we're overriding existing methods, and we want to add behavior to them unobtrusively. You can learn some techniques for DRYing and testing @method_missing@ and @respond_to?@ at "Technical Pickles":http://technicalpickles.com/posts/using-method_missing-and-respond_to-to-create-dynamic-methods/.
+
+Let's examine a bug with @respond_to?@ in a Rails plugin you're probably using...
+
+h3. will_paginate and respond_to?
+
+Here is a Post model that contains a class method called @paginate_by_something@.
+
+{% highlight ruby %}
+# will_paginate is installed
+class Post < ActiveRecord::Base
+  def self.paginate_by_something
+    # "something" is not an attribute
+  end
+end
+
+Post.respond_to?(:paginate_by_something) # => false
+{% endhighlight %}
+
+What!? We explicitly define a class level method, but when we interrogate it with @respond_to?@ it returns @false@.
+
+The problem is with will_paginate's @respond_to?@. Below is a snippet of code from will_paginate that gets mixed into your models.
+
+{% highlight ruby %}
+def respond_to?(method, include_priv = false) #:nodoc:
+  case method.to_sym
+  when :paginate, :paginate_by_sql
+    true
+  else
+    super(method.to_s.sub(/^paginate/, 'find'), include_priv)
+  end
+end
+{% endhighlight %}
+
+The first thing will_paginate does is return true for its obvious methods: @paginate@ and @paginate_by_sql@. Then the interesting part of this code is the call to @super@. It turns a method like @paginate_by_author@ into @find_by_author@, which @respond_to?@ would return @true@ for, if it is an ActiveRecord dynamic finder. Going back to the @paginate_by_something@ example in our Post model, we can see that @respond_to?@ returns @false@ because @find_by_something@ is NOT a dynamic finder (when "something" is not an attribute).
+
+The fix to will_paginate is fairly simple, and "I've already submitted a patch":http://github.com/enriquez/will_paginate/commit/26e5cf73f37338a8b7c78abddaccc22910d839ff. Props to Ryan Briones for pairing with me while debugging the problem on a project at Chase.
+
+On a side note, if you have a particular RSpec test that fails when you run the whole test suite, but pass when ran individually; Check your mocks on methods that don't implement @respond_to?@ correctly. RSpec uses @respond_to?@ internally when using mocks, and RSpec expects it to work!

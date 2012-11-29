@@ -1,0 +1,43 @@
+---
+layout: post
+title: Namespaced controller and url generation gotcha in Rails
+---
+I ran into a gotcha while working on a Rails app that was written a few years ago, before the idea of REST came about.
+
+What is the path generated from the following?
+
+{% highlight erb %}
+<%= link_to "Clicky", :controller => "posts" %>
+{% endhighlight %}
+
+Normally, you would expect @/posts@, but that's not always the case. It depends upon the context of where this is being called. If you're inside a namespaced controller such as @Admin::CommentsController@, then the generated url is @/admin/posts@.
+
+It turns out that Rails assumes that if you're within the context of a namespace that you want to stay in that namespace. You can read more about it "in the documentation for url_for":http://api.rubyonrails.org/classes/ActionController/Base.html#M000649. It's a bit of a WTF moment when you specify a controller and you end up with something else.
+
+Here are 2 ways to get around this behavior.
+
+h3. Workaround #1: Add a leading slash
+
+The leading slash forces the url generation to ignore the defaults.
+
+{% highlight erb %}
+<%= link_to "Clicky", :controller => "/posts" %>
+{% endhighlight %}
+
+h3. Workaround #2: Override url_for
+
+In the app I was working on, changing every generated url wasn't doable given time constraints. I came up with a little hack to override @url_for@ in the controller to always add the leading slash.
+
+{% highlight ruby %}
+# app/controllers/admin/comments_controller.rb
+
+protected
+def url_for(options = {})
+  if options.is_a?(Hash) && options.has_key?(:controller)
+    options[:controller] = "/#{options[:controller]}"
+  end
+  super(options)
+end
+{% endhighlight %}
+
+I haven't investigated any side effects to this, so be warned and run your tests.

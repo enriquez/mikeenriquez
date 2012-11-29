@@ -1,0 +1,37 @@
+---
+layout: post
+title: Chocolate Meat Mephisto Theme
+---
+!http://s3.amazonaws.com/theezpzway/files/2/original.png!
+
+??"Photo by flickr user bigberto":http://www.flickr.com/photos/bigberto/2122377360/??
+
+What is chocolate meat? Not only is it a delicious Filipino dish it is now also a Mephisto theme! For blogging developers, it uses a modified version of the "lazy" TextMate syntax highlighting theme (via Ultraviolet). Check out "my last post":http://theezpzway.com/2009/3/8/how-to-integrate-ultraviolet-into-mephisto to see the syntax highlighting in action (this blog is using Chocolate Meat)
+
+Tried and tested on Mephisto 0.8. Anything else is unknown territory.
+
+"Chocolate Meat AKA Dinuguan":http://en.wikipedia.org/wiki/Dinuguan
+
+h3. Features
+
+* Built upon the "Blueprint CSS Framework":http://blueprintcss.org/
+* W3C Valid XHTML 1.1
+* "AddThis":http://addthis.com integration.
+* Syntax highlighting (with Ultraviolet)
+* It looks awesome! Check out the rest of this blog for examples.
+
+h3. Download
+
+"chocolate_meat-1.0.zip":http://cloud.github.com/downloads/enriquez/chocolate-meat/chocolate_meat-1.0.zip
+
+h3. Install
+
+Log into your Mephisto site, then navigate to Design -> Manage Themes -> Import New Theme. Browse to the zip file and activate the theme.
+
+The "lazy" syntax highlighting theme relies on "Ultraviolet":http://ultraviolet.rubyforge.org/. If you want this feature, read "my last post for directions":/2009/3/8/how-to-integrate-ultraviolet-into-mephisto for integrating it into Mephisto.
+
+h3. Contribute
+
+The latest version of chocolate meat is on "github":http://github.com/enriquez/chocolate-meat/tree/master. Fork it, fix it, change it, whatever... Please share.
+
+Note: This blog no longer uses this theme. You can see it at the "Mephisto Themes Gallery":http://mephisto-themes.nanorails.com/gallery by selecting "chocolate meat" from the menu at the top.

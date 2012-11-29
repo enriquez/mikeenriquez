@@ -1,0 +1,30 @@
+---
+layout: post
+title: jQuery plugin EZPZ Hint
+---
+A simple jQuery plugin for showing a text field's label inside the textbox itself. The hint disappears when it is given focus, and appears again if the inputted text is empty. Typically used for search and login forms.
+
+This plugin works in all modern browsers, and it even works with password field hints.
+
+Check out "the demo here":/demos/ezpz-hint.
+
+h3. Features
+* *Hint text is re-displayed when field is empty*. If the user erases the text in the input, the hint will be shown again.
+* *Works with password fields*. This is achieved with dummy inputs to hold the hint text. Tested in all modern browsers.
+* *Allows default values*. If the form is pre-populated, the plugin works as expected.
+
+h3. How it works
+
+The hint text is taken from the title attribute of the input. Sorry, no graceful degradation. Disabled javascript users will see a bunch of unlabeled text boxes. A future version will use a label tag to get the hint text.
+
+Since IE doesn't allow a password field to be changed into a text field, a dummy text field is dynamically created to hold the hint text. The dummy input and real input swap visibility on focus and blur to give the illusion that the hint text is appearing and disappearing. The only problem with this technique is that the dummy text field is not a direct copy of the real text field. The plugin only copies over the @class@ and @size@ attributes
+
+This plugin disables the remember password feature of most browsers by setting autocomplete to "off". The text hint gets confused with it on, and the browser actually remembers the dummy inputs instead of the real inputs. This can be fixed in the future to move all the dummy inputs to the top of the form, and the replacement would have to be done by absolutely positioning the dummys over the real text fields (that's the theory anyway, I don't know if it would work).
+
+h3. Download
+
+As always, the "code is available on GitHub":http://github.com/enriquez/ezpz-hint. It can also be downloaded below.
+
+"jquery.ezpz_hint.js":http://cloud.github.com/downloads/enriquez/ezpz-hint/jquery.ezpz_hint.js
+
+"jquery.ezpz_hint.min.js":http://cloud.github.com/downloads/enriquez/ezpz-hint/jquery.ezpz_hint.min.js
