@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Mike Enriquez</title>
+    {% if page.title %}
+      <title>{{ page.title }} - Mike Enriquez</title>
+    {% else %}
+      <title>Mike Enriquez</title>
+    {% endif %}
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0">
