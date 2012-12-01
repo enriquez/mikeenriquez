@@ -1,0 +1,34 @@
+---
+layout: post
+title: EZPZ Hint Demo
+scripts: <script src="http://s3.amazonaws.com/theezpzway/attachments/4/original.js" type="text/javascript" charset="utf-8"></script> <script type="text/javascript" charset="utf-8">$(document).ready(function(){ $("input#search").ezpz_hint(); $("input.login_hint").ezpz_hint(); });</script>
+---
+
+h3. Search form
+
+<p>
+<input type="text" name="search" value="" class="hint" id="search" title="Search" />
+</p>
+
+{% highlight html %}
+<input type="text" name="search" value="" class="hint" id="search" title="Search" />
+{% endhighlight %}
+
+{% highlight javascript %}
+$("input#search").ezpz_hint();
+{% endhighlight %}
+
+h3. Login form
+
+<p>
+<input type="text" name="username" value="" class="login_hint" id="username" title="Username" /><br/><input type="password" name="password" value="" class="login_hint" id="password" title="Password" />
+</p>
+
+{% highlight html %}
+<input type="text" name="username" value="" class="login_hint" id="username" title="Username" />
+<input type="password" name="password" value="" class="login_hint" id="password" title="Password" />
+{% endhighlight %}
+
+{% highlight javascript %}
+$("input.login_hint").ezpz_hint();
+{% endhighlight %}

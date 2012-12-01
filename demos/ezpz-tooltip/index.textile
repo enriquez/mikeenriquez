@@ -1,0 +1,107 @@
+---
+layout: post
+title: EZPZ Tooltip Demo
+scripts: |
+  <script src="http://s3.amazonaws.com/theezpzway/attachments/5/original.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+  $(document).ready(function(){ $('#simple-target-1').ezpz_tooltip(); $("#effects").ezpz_tooltip({ contentId: 'simple-content-1', showContent: function(content) { content.fadeIn('slow'); }, hideContent: function(content) { content.stop(true, true).fadeOut('slow'); } }); $("#static-target-1").ezpz_tooltip({ contentPosition: 'rightStatic' }); $("#stay-target-1").ezpz_tooltip({ contentPosition: 'belowStatic', stayOnContent: true, offset: 0 }); $("#ajax-target-1").ezpz_tooltip({ beforeShow: function(content){ if (content.html() == "") { $.get("/ajax.txt", function(html){ content.html(html); }); } } }); $("#fancy-target-1").ezpz_tooltip(); });
+  </script>
+  <style type="text/css" media="screen"> h3 { margin-top: 20px; } .tooltip-target { display: block; padding: 10px; background-color: #EEE; text-align: center; } .tooltip-content { display: none; /* required */ position: absolute; /* required */ width: 250px; padding: 10px; border: 3px solid #AF8A31; background-color: #FFC848; text-align: center; color: black; } .tooltip-content p { margin: 0; } #fancy-content-1 { border: none; background: url('http://s3.amazonaws.com/theezpzway/files/1/original.png'); width: 277px; height: 96px; } </style>
+---
+
+The following are some examples of how the EZPZ Tooltip can be used.
+
+
+"Click here to visit the documentation":/2009/3/17/jquery-plugin-ezpz-tooltip
+
+h3. Default, no options
+
+The tooltip appears as you hover over the target, and follows the mouse cursor until it leaves the target.
+
+<div class="simple-tooltip-target tooltip-target" id="simple-target-1">Simple ToolTip</div>
+<div class="simple-tooltip-content tooltip-content" id="simple-content-1">
+  <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sit amet enim... </p>
+</div>
+
+{% highlight javascript %}
+$("#simple-target-1").ezpz_tooltip();
+{% endhighlight %}
+
+h3. Effects
+
+The options @showContent(content){}@ and @hideContent(content){}@ allow you to customize how the content element is shown and hidden. Given a reference to the content element, you can call an effect on it.
+
+<div class="effects-tooltip-target tooltip-target" id="effects">Effects ToolTip</div>
+
+{% highlight javascript %}
+$("#effects").ezpz_tooltip({
+  contentId: 'simple-content-1',
+  showContent: function(content) {
+    content.fadeIn('slow');
+  },
+  hideContent: function(content) {
+    // if the showing animation is still running, be sure to stop it
+    // and clear the animation queue. otherwise, repeatedly hovering will
+    // cause the content to blink.
+    content.stop(true, true).fadeOut('slow');
+  }
+});
+{% endhighlight %}
+
+h3. Static Position
+
+The tooltip appears in a static position relative to the target.
+
+<div class="static-tooltip-content tooltip-content" id="static-content-1">
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sit amet enim...</p>
+</div>
+<div class="static-tooltip-target tooltip-target" id="static-target-1">Static Position ToolTip</div>
+
+{% highlight javascript %}
+$("#static-target-1").ezpz_tooltip({ contentPosition: 'rightStatic' });
+{% endhighlight %}
+
+h3. Stay on Content
+
+A static tooltip that stays visible when mouse is over the target and the content.
+
+<div class="stay-tooltip-content tooltip-content" id="stay-content-1">
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas sit amet enim...<br />
+    <a href="javascript:">You can reach down and click this</a>
+  </p>
+</div>
+<div class="stay-tooltip-target tooltip-target" id="stay-target-1">Stay on Content ToolTip</div>
+
+{% highlight javascript %}
+$("#stay-target-1").ezpz_tooltip({
+  contentPosition: 'belowStatic',
+  stayOnContent: true,
+  offset: 0
+});
+{% endhighlight %}
+
+h3. AJAX
+
+A tooltip with the content loaded with AJAX
+
+<div class="ajax-tooltip-target tooltip-target" id="ajax-target-1">AJAX ToolTip</div>
+<div class="ajax-tooltip-content tooltip-content" id="ajax-content-1"></div>
+
+{% highlight javascript %}
+$("#ajax-target-1").ezpz_tooltip({
+  beforeShow: function(content){
+    if (content.html() == "") {
+      $.get("/ajax.html", function(html){
+        content.html(html);
+      });
+    }
+  }
+});
+{% endhighlight %}
+
+h3. Getting Fancy with it
+
+Using CSS, the content element can be styled with a background image that uses transparencies.
+<div class="fancy-tooltip-target tooltip-target" id="fancy-target-1">Fancy ToolTip</div>
+<div class="fancy-tooltip-content tooltip-content" id="fancy-content-1">Wow! That's EZPZ!</div>
