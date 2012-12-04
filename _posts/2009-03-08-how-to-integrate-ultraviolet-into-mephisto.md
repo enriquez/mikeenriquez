@@ -68,9 +68,7 @@ end
 {% endhighlight %}
 <p>This will create a css directory containing all of the TextMate themes. Copy the theme you want and include it in your layout.liquid:</p>
 {% highlight bash %}
-{% raw %}
 <!-- layout.liquid -->
-{{ 'lazy' | stylesheet : 'screen, projection' }}
-{% endraw %}
+{{ "{{ 'lazy' | stylesheet : 'screen, projection' " }}}}
 {% endhighlight %}
 <p>That&#8217;s it! Using it works the same way as before by using the <code>&lt;macro:code lang="ruby"&gt;</code> tags. A list of supported languages can be found by running <code>puts Uv.syntaxes.join( ", " )</code> in irb.</p>
