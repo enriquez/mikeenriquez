@@ -1,0 +1,4 @@
+h1. Mike Enriquez blog
+
+Jekyll website for http://blog.enriquez.me
+
